@@ -11,6 +11,7 @@ export default class Main extends Component {
     newRepo: 'rocketseat/unform',
     repositories: [],
     loading: false,
+    repoNotFound: false,
   };
 
   componentDidMount() {
@@ -43,21 +44,32 @@ export default class Main extends Component {
 
     this.setState({ loading: true });
 
-    const response = await api.get(`/repos/${newRepo}`);
+    try {
+      const response = await api.get(`/repos/${newRepo}`);
 
-    const data = {
-      name: response.data.full_name,
-    };
+      const data = {
+        name: response.data.full_name,
+      };
+
+      this.setState({
+        repositories: [...repositories, data],
+        newRepo: '',
+        repoNotFound: false,
+      });
+    } catch (error) {
+      console.log('dasdasdasd');
+      this.setState({
+        repoNotFound: true,
+      });
+    }
 
     this.setState({
-      repositories: [...repositories, data],
-      newRepo: '',
       loading: false,
     });
   };
 
   render() {
-    const { newRepo, loading, repositories } = this.state;
+    const { newRepo, loading, repositories, repoNotFound } = this.state;
 
     return (
       <Container>
@@ -65,7 +77,7 @@ export default class Main extends Component {
           <FaGithubAlt /> Repositorios
         </h1>
 
-        <Form onSubmit={this.handleSubmit}>
+        <Form onSubmit={this.handleSubmit} error={repoNotFound}>
           <input
             type="text"
             placeholder="Adicionar repositóio"
